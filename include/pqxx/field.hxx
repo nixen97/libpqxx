@@ -197,7 +197,7 @@ public:
       if constexpr (nullness<T>::has_null)
         obj = nullness<T>::null();
       else
-        internal::throw_null_conversion(type_name<T>);
+        internal::throw_null_conversion(name_type<T>());
     }
     return obj;
   }
@@ -381,7 +381,7 @@ template<typename T> inline T from_string(field const &value)
     if constexpr (nullness<T>::has_null)
       return nullness<T>::null();
     else
-      internal::throw_null_conversion(type_name<T>);
+      internal::throw_null_conversion(name_type<T>());
   }
   else
   {

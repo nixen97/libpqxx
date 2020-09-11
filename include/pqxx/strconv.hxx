@@ -64,17 +64,24 @@ namespace pqxx
 //@{
 
 /// A human-readable name for a type, used in error messages and such.
-/** Actually this may not always be very user-friendly.  It uses
- * @c std::type_info::name().  On gcc-like compilers we try to demangle its
- * output.  Visual Studio produces human-friendly names out of the box.
+/** @deprecated Use @c name_type() instead.
  *
- * This variable is not inline.  Inlining it gives rise to "memory leak"
- * warnings from asan, the address sanitizer, possibly from use of
- * @c std::type_info::name.
+ * Don't define this, and don't use it.  It may lead to problems with
+ * initialisation order.
  */
 template<typename TYPE>
 std::string const type_name{internal::demangle_type_name(typeid(TYPE).name())};
 
+
+/// A human-readable name for a type, used in error messages and such.
+/** Actually this may not always be very user-friendly.  It uses
+ * @c std::type_info::name().  On gcc-like compilers we try to demangle its
+ * output.  Visual Studio produces human-friendly names out of the box.
+ */
+template<typename TYPE> inline std::string name_type()
+{
+  return internal::demangle_type_name(typeid(TYPE).name());
+}
 
 /// Traits describing a type's "null value," if any.
 /** Some C++ types have a special value or state which correspond directly to
@@ -233,9 +240,9 @@ template<typename ENUM> struct enum_traits
  *      int main() { std::cout << pqxx::to_string(xa) << std::endl; }
  */
 #define PQXX_DECLARE_ENUM_CONVERSION(ENUM)                                    \
+  template<> inline std::string name_type<ENUM>() { return #ENUM; }           \
   template<> struct string_traits<ENUM> : pqxx::internal::enum_traits<ENUM>   \
-  {};                                                                         \
-  template<> inline std::string const type_name<ENUM> { #ENUM }
+  {}
 
 
 namespace pqxx

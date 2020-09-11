@@ -85,7 +85,7 @@ inline char *generic_into_buf(char *begin, char *end, T const &value)
   auto const len = text.size() + 1;
   if (len > space)
     throw conversion_overrun{
-      "Not enough buffer space to insert " + type_name<T> + ".  " +
+      "Not enough buffer space to insert " + name_type<T>() + ".  " +
       state_buffer_overrun(space, len)};
   std::memmove(begin, text.data(), len);
   return begin + len;
@@ -953,7 +953,7 @@ template<typename T> inline std::string to_string(T const &value)
 {
   if (is_null(value))
     throw conversion_error{
-      "Attempt to convert null " + type_name<T> + " to a string."};
+      "Attempt to convert null " + name_type<T>() + " to a string."};
 
   std::string buf;
   // We can't just reserve() data; modifying the terminating zero leads to
@@ -988,7 +988,7 @@ template<typename T> inline void into_string(T const &value, std::string &out)
 {
   if (is_null(value))
     throw conversion_error{
-      "Attempt to convert null " + type_name<T> + " to a string."};
+      "Attempt to convert null " + name_type<T>() + " to a string."};
 
   // We can't just reserve() data; modifying the terminating zero leads to
   // undefined behaviour.

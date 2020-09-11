@@ -61,10 +61,6 @@ First off, of course, you need a C++ type.  It may be your own, but it
 doesn't have to be.  It could be a type from a third-party library, or even one
 from the standard library that libpqxx does not yet support.
 
-You also specialise the `pqxx::type_name` variable to specify the type's name.
-This is important for all code which mentions your type in human-readable text,
-such as error messages.
-
 Then, does your type have a built-in null value?  You specialise the
 `pqxx::nullness` template to specify the details.
 
@@ -95,30 +91,6 @@ argument.
 The library also provides specialisations for `std::optional<T>`,
 `std::shared_ptr<T>`, and `std::unique_ptr<T>`.  If you have conversions for
 `T`, you'll also have conversions for those.
-
-
-Specialise `type_name`
-----------------------
-
-When errors happen during conversion, libpqxx will compose error messages for
-the user.  Sometimes these will include the name of the type that's being
-converted.
-
-To tell libpqxx the name of each type, there's a template variable called
-`pqxx::type_name`.  For any given type `T`, it should have a specialisation
-that provides that `T`'s human-readable name:
-
-    namespace pqxx
-    {
-    template<> std::string const type_name<T>{"T"};
-    }
-
-(Yes, this means that you need to define something inside the pqxx namespace.
-Future versions of libpqxx may move this into a separate namespace.)
-
-Define this early on in your translation unit, before any code that might cause
-libpqxx to need the name.  That way, the libpqxx code which needs to know the
-type's name can see your definition.
 
 
 Specialise `nullness`
@@ -286,6 +258,32 @@ space than just what's needed to store the result, include that too.
 
 Make `size_buffer` a `constexpr` function if you can.  It can allow the caller
 to allocate the buffer on the stack, with a size known at compile time.
+
+
+Optional: Specialise `name_type`
+--------------------------------
+
+Sometimes, for example in error messages, libpqxx needs to show a name for your
+type at run time.  It sort of knows how to get a name, but it's not necessarily
+a very clear name.  Depending on your compiler and operating system environment
+it may show the class name, or a "mangled" version.
+
+You can, if you like, define a _nice_ name for your type.  Just specialise the
+inline function template, `name_type()`.
+
+Let's say your type is named `MessageHeader`.  You could write:
+
+    namespace pqxx
+    {
+    template<> inline std::string name_type<MessageHeader>()
+    {
+      return "Message Hader";
+    }
+    }
+
+Do this early on in your translation unit, before any code that might cause
+libpqxx to need the name.  That way, the libpqxx code which needs to know the
+type's name can see your definition.
 
 
 Optional: Specialise `is_unquoted_safe`

@@ -128,13 +128,13 @@ wrap_to_chars(char *begin, char *end, T const &value)
     {
     case std::errc::value_too_large:
       throw pqxx::conversion_overrun{
-        "Could not convert " + pqxx::type_name<T> +
+        "Could not convert " + pqxx::name_type<T>() +
         " to string: "
         "buffer too small (" +
         pqxx::to_string(end - begin) + " bytes)."};
     default:
       throw pqxx::conversion_error{
-        "Could not convert " + pqxx::type_name<T> + " to string."};
+        "Could not convert " + pqxx::name_type<T>() + " to string."};
     }
   // No need to check for overrun here: we never even told to_chars about that
   // last byte in the buffer, so it didn't get used up.
@@ -155,7 +155,7 @@ zview integral_traits<T>::to_buf(char *begin, char *end, T const &value)
     need{static_cast<ptrdiff_t>(size_buffer(value))};
   if (space < need)
     throw conversion_overrun{
-      "Could not convert " + type_name<T> +
+      "Could not convert " + name_type<T>() +
       " to string: "
       "buffer too small.  " +
       pqxx::internal::state_buffer_overrun(space, need)};
@@ -297,7 +297,7 @@ template<typename TYPE>
     "Could not convert '" + std::string(in) +
     "' "
     "to " +
-    pqxx::type_name<TYPE>};
+    pqxx::name_type<TYPE>()};
   if (msg.empty())
     throw pqxx::conversion_error{base + "."};
   else
@@ -387,7 +387,7 @@ template<typename T>
 {
   if (text.size() == 0)
     throw pqxx::conversion_error{
-      "Attempt to convert empty string to " + pqxx::type_name<T> + "."};
+      "Attempt to convert empty string to " + pqxx::name_type<T>() + "."};
 
   char const *const data{text.data()};
   std::size_t i{0};
@@ -404,7 +404,7 @@ template<typename T>
     ;
   if (i == text.size())
     throw pqxx::conversion_error{
-      "Converting string to " + pqxx::type_name<T> +
+      "Converting string to " + pqxx::name_type<T>() +
       ", but it contains only whitespace."};
 
   char const initial{data[i]};
@@ -419,12 +419,12 @@ template<typename T>
   {
     if constexpr (not std::is_signed_v<T>)
       throw pqxx::conversion_error{
-        "Attempt to convert negative value to " + pqxx::type_name<T> + "."};
+        "Attempt to convert negative value to " + pqxx::name_type<T>() + "."};
 
     ++i;
     if (i >= text.size())
       throw pqxx::conversion_error{
-        "Converting string to " + pqxx::type_name<T> +
+        "Converting string to " + pqxx::name_type<T>() +
         ", but it contains only a sign."};
     for (; i < text.size() and isdigit(data[i]); ++i)
       result = absorb_digit_negative(result, digit_to_number(data[i]));
@@ -432,7 +432,7 @@ template<typename T>
   else
   {
     throw pqxx::conversion_error{
-      "Could not convert string to " + pqxx::type_name<T> +
+      "Could not convert string to " + pqxx::name_type<T>() +
       ": "
       "'" +
       std::string{text} + "'."};
@@ -440,7 +440,7 @@ template<typename T>
 
   if (i < text.size())
     throw pqxx::conversion_error{
-      "Unexpected text after " + pqxx::type_name<T> +
+      "Unexpected text after " + pqxx::name_type<T>() +
       ": "
       "'" +
       std::string{text} + "'."};
@@ -506,7 +506,7 @@ template<typename T> inline T from_string_awful_float(std::string_view text)
 {
   if (text.empty())
     throw pqxx::conversion_error{
-      "Trying to convert empty string to " + pqxx::type_name<T> + "."};
+      "Trying to convert empty string to " + pqxx::name_type<T>() + "."};
 
   bool ok{false};
   T result;
