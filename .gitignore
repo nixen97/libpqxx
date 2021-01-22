@@ -48,3 +48,7 @@ win32/common
 **/runner.log
 **/runner.trs
 **/test-suite.log
+bin/
+bin-int/
+**.vcxproj*
+
